@@ -27,7 +27,7 @@ public class EmailCodeServiceImpl implements EmailCodeService {
 
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    /*@Transactional(rollbackFor = Exception.class)*/
     public void sendEmailCode(String email, Integer type) {
         try {
             System.out.println("发送邮件验证码");
@@ -56,14 +56,13 @@ public class EmailCodeServiceImpl implements EmailCodeService {
             //发送验证码
             EmailCode emailCode = new EmailCode();
             EmailCodeKey emailCodeKey = new EmailCodeKey();
-            emailCodeKey.setEmail(email);
-            emailCodeKey.setCode(code);
+            emailCode.setEmail(email);
+            emailCode.setCode(code);
             emailCode.setStatus(Constants.ZERO);
             emailCode.setCreateTime(new java.util.Date());
             
-            // 这里应该设置主键
-            emailCode.setEmail(email);
-            emailCode.setCode(code);
+
+
             
             emailCodeMapper.insert(emailCode);
             
