@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.networkdisk.mappers.EmailCodeMapper">
+  <resultMap id="BaseResultMap" type="org.example.networkdisk.entity.po.EmailCode">
+    <id column="email" jdbcType="VARCHAR" property="email" />
+    <id column="code" jdbcType="VARCHAR" property="code" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="status" jdbcType="BIT" property="status" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    email, code, create_time, status
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="org.example.networkdisk.entity.po.EmailCodeKey" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from email_code
+    where email = #{email,jdbcType=VARCHAR}
+      and code = #{code,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="org.example.networkdisk.entity.po.EmailCodeKey">
+    delete from email_code
+    where email = #{email,jdbcType=VARCHAR}
+      and code = #{code,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="org.example.networkdisk.entity.po.EmailCode">
+    insert into email_code (email, code, create_time, 
+      status)
+    values (#{email,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{status,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="org.example.networkdisk.entity.po.EmailCode">
+    insert into email_code
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="email != null">
+        email,
+      </if>
+      <if test="code != null">
+        code,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null">
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="org.example.networkdisk.entity.po.EmailCode">
+    update email_code
+    <set>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=BIT},
+      </if>
+    </set>
+    where email = #{email,jdbcType=VARCHAR}
+      and code = #{code,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.example.networkdisk.entity.po.EmailCode">
+    update email_code
+    set create_time = #{createTime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=BIT}
+    where email = #{email,jdbcType=VARCHAR}
+      and code = #{code,jdbcType=VARCHAR}
+  </update>
+</mapper>
