@@ -58,7 +58,8 @@ public class LogAspect {
         // 获取注解信息
         LogAnnotation logAnnotation = method.getAnnotation(LogAnnotation.class);
         String logDescription = logAnnotation != null ? logAnnotation.value() : "";
-        
+        System.out.println("描述: " + logDescription);
+
         // 获取请求信息（如果是Controller方法）
         String requestInfo = "";
         try {
