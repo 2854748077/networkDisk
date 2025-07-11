@@ -22,20 +22,8 @@ import java.util.Arrays;
 @Component
 public class LogAspect {
 
-    /**
-     * 定义切点 - 所有Controller方法
-     */
-/*
-    @Pointcut("execution(* org.example.networkdisk.controller..*.*(..))")
-    public void controllerLog() {}
-*/
 
-    /**
-     * 定义切点 - 所有Service方法
-     */
-    /*@Pointcut("execution(* org.example.networkdisk.services..*.*(..))")
-    public void serviceLog() {}
-*/
+
     /**
      * 定义切点 - 带有@LogAnnotation注解的方法
      */

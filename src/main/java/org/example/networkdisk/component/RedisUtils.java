@@ -29,7 +29,7 @@ public class RedisUtils {
     * */
     public SysSettingsDto set(String key, SysSettingsDto value) {
         redisTemplate.opsForValue().set(key, value);
-        new ArrayList<>()
+        new ArrayList<>();
         return value;
     }
 

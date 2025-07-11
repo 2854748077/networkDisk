@@ -1,5 +1,6 @@
 package org.example.networkdisk.controller;
 
+import org.example.networkdisk.annotation.GlobalInterceptor;
 import org.example.networkdisk.annotation.LogAnnotation;
 import org.example.networkdisk.entity.constants.Constants;
 import org.example.networkdisk.entity.dto.CreateImageCode;
@@ -30,6 +31,7 @@ public class accountController  extends BaseController{
     //传前端验证码
     @RequestMapping("/checkCode")
     @LogAnnotation("生成验证码")
+    @GlobalInterceptor(checkParams = true)
     public void checkCode(HttpServletResponse response, Integer type, HttpSession session) throws IOException {
 
         CreateImageCode VCode = new CreateImageCode(130,38,5,10);
