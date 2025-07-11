@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 @Component("RedisUtils")
@@ -28,6 +29,7 @@ public class RedisUtils {
     * */
     public SysSettingsDto set(String key, SysSettingsDto value) {
         redisTemplate.opsForValue().set(key, value);
+        new ArrayList<>()
         return value;
     }
 
