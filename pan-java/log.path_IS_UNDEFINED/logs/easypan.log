@@ -1,0 +1,49 @@
+2025-07-18 20:30:54 [DEBUG][com.zaxxer.hikari.pool.HikariPool][logPoolState][421]-> HikariCPDatasource - Before cleanup stats (total=6, active=1, idle=5, waiting=0)
+2025-07-18 20:30:54 [DEBUG][com.zaxxer.hikari.pool.HikariPool][logPoolState][421]-> HikariCPDatasource - After cleanup  stats (total=6, active=1, idle=5, waiting=0)
+2025-07-18 20:30:54 [DEBUG][com.zaxxer.hikari.pool.HikariPool][fillPool][518]-> HikariCPDatasource - Fill pool skipped, pool is at sufficient level.
+2025-07-18 20:30:59 [DEBUG][org.springframework.web.servlet.DispatcherServlet][traceDebug][108]-> GET "/api/checkCode?type=0&time=1752841859529", parameters={masked}
+2025-07-18 20:30:59 [DEBUG][org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping][getHandler][522]-> Mapped to com.easypan.controller.AccountController#checkCode(HttpServletResponse, HttpSession, Integer)
+2025-07-18 20:30:59 [DEBUG][org.springframework.web.servlet.DispatcherServlet][logResult][1131]-> Completed 200 OK
+2025-07-18 20:31:02 [DEBUG][org.springframework.web.servlet.DispatcherServlet][traceDebug][108]-> POST "/api/githublogin", parameters={multipart}
+2025-07-18 20:31:02 [WARN][org.apache.catalina.connector.Request][log][173]-> Creating the temporary upload location [C:\Users\39924\AppData\Local\Temp\tomcat.7090.10774289672715638268\work\Tomcat\localhost\api\www\easypan\temp] as it is required by the servlet [dispatcherServlet]
+2025-07-18 20:31:02 [DEBUG][org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping][getHandler][522]-> Mapped to com.easypan.controller.AccountController#githxublogin(HttpSession, String)
+2025-07-18 20:31:02 [DEBUG][org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor][writeWithMessageConverters][268]-> Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json, application/json, application/*+json]
+2025-07-18 20:31:02 [DEBUG][org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor][traceDebug][108]-> Writing [com.easypan.entity.vo.ResponseVO@26e461be]
+2025-07-18 20:31:02 [DEBUG][org.springframework.web.servlet.DispatcherServlet][logResult][1131]-> Completed 200 OK
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.HikariPool][logPoolState][421]-> HikariCPDatasource - Before cleanup stats (total=6, active=1, idle=5, waiting=0)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.HikariPool][logPoolState][421]-> HikariCPDatasource - After cleanup  stats (total=6, active=1, idle=5, waiting=0)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.HikariPool][fillPool][518]-> HikariCPDatasource - Fill pool skipped, pool is at sufficient level.
+2025-07-18 20:31:24 [DEBUG][org.springframework.boot.availability.ApplicationAvailabilityBean][onApplicationEvent][77]-> Application availability state ReadinessState changed from ACCEPTING_TRAFFIC to REFUSING_TRAFFIC
+2025-07-18 20:31:24 [DEBUG][org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext][doClose][1049]-> Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@7cbc3762, started on Fri Jul 18 20:20:51 CST 2025
+2025-07-18 20:31:24 [DEBUG][org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertyResolver$DefaultResolver][logKeyFound][115]-> Found key 'spring.liveBeansView.mbeanDomain' in PropertySource 'systemProperties' with value of type String
+2025-07-18 20:31:24 [DEBUG][org.springframework.context.support.DefaultLifecycleProcessor][stop][365]-> Stopping beans in phase 2147483647
+2025-07-18 20:31:24 [DEBUG][org.springframework.context.support.DefaultLifecycleProcessor][lambda$doStop$3][238]-> Bean 'webServerGracefulShutdown' completed its stop procedure
+2025-07-18 20:31:24 [DEBUG][org.springframework.context.support.DefaultLifecycleProcessor][stop][365]-> Stopping beans in phase 2147483646
+2025-07-18 20:31:24 [DEBUG][org.springframework.context.support.DefaultLifecycleProcessor][lambda$doStop$3][238]-> Bean 'webServerStartStop' completed its stop procedure
+2025-07-18 20:31:24 [DEBUG][org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler][shutdown][218]-> Shutting down ExecutorService 'taskScheduler'
+2025-07-18 20:31:24 [DEBUG][org.springframework.data.redis.listener.RedisMessageListenerContainer][stop][242]-> Stopped RedisMessageListenerContainer
+2025-07-18 20:31:24 [DEBUG][org.springframework.jmx.export.annotation.AnnotationMBeanExporter][destroy][452]-> Unregistering JMX-exposed beans on shutdown
+2025-07-18 20:31:24 [DEBUG][org.springframework.jmx.export.annotation.AnnotationMBeanExporter][unregisterBeans][186]-> Unregistering JMX-exposed beans
+2025-07-18 20:31:24 [DEBUG][org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor][shutdown][218]-> Shutting down ExecutorService 'applicationTaskExecutor'
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.RedisChannelHandler][closeAsync][141]-> closeAsync()
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.protocol.DefaultEndpoint][closeAsync][590]-> [channel=0x9780a2af, /127.0.0.1:13988 -> /127.0.0.1:6379, epid=0x1] closeAsync()
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.AbstractRedisClient][shutdownAsync][539]-> Initiate shutdown (100, 100, MILLISECONDS)
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.protocol.CommandHandler][channelInactive][344]-> [channel=0x9780a2af, /127.0.0.1:13988 -> /127.0.0.1:6379, epid=0x1, chid=0x1] channelInactive()
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.protocol.DefaultEndpoint][lambda$notifyChannelInactive$3][504]-> [channel=0x9780a2af, /127.0.0.1:13988 -> /127.0.0.1:6379, epid=0x1] deactivating endpoint handler
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.protocol.CommandHandler][channelInactive][368]-> [channel=0x9780a2af, /127.0.0.1:13988 -> /127.0.0.1:6379, epid=0x1, chid=0x1] channelInactive() done
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.resource.DefaultEventLoopGroupProvider][doRelease][281]-> Release executor io.netty.channel.nio.NioEventLoopGroup@4f356b98
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.protocol.ConnectionWatchdog][channelInactive][196]-> [channel=0x9780a2af, /127.0.0.1:13988 -> /127.0.0.1:6379, last known addr=/127.0.0.1:6379] channelInactive()
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.protocol.ConnectionWatchdog][channelInactive][207]-> [channel=0x9780a2af, /127.0.0.1:13988 -> /127.0.0.1:6379, last known addr=/127.0.0.1:6379] Reconnect scheduling disabled
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.protocol.CommandHandler][channelUnregistered][227]-> [channel=0x9780a2af, /127.0.0.1:13988 -> /127.0.0.1:6379, epid=0x1, chid=0x1] channelUnregistered()
+2025-07-18 20:31:24 [DEBUG][io.netty.buffer.PoolThreadCache][free][224]-> Freed 5 thread-local buffer(s) from thread: lettuce-nioEventLoop-4-1
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.resource.DefaultClientResources][shutdown][710]-> Initiate shutdown (0, 2, SECONDS)
+2025-07-18 20:31:24 [DEBUG][io.lettuce.core.resource.DefaultEventLoopGroupProvider][shutdown][317]-> Initiate shutdown (0, 2, SECONDS)
+2025-07-18 20:31:24 [INFO][com.zaxxer.hikari.HikariDataSource][close][350]-> HikariCPDatasource - Shutdown initiated...
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.HikariPool][logPoolState][421]-> HikariCPDatasource - Before shutdown stats (total=6, active=1, idle=5, waiting=0)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.PoolBase][quietlyCloseConnection][134]-> HikariCPDatasource - Closing connection com.mysql.cj.jdbc.ConnectionImpl@4b74c8e3: (connection evicted)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.PoolBase][quietlyCloseConnection][134]-> HikariCPDatasource - Closing connection com.mysql.cj.jdbc.ConnectionImpl@358e17d7: (connection evicted)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.PoolBase][quietlyCloseConnection][134]-> HikariCPDatasource - Closing connection com.mysql.cj.jdbc.ConnectionImpl@2f156846: (connection evicted)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.PoolBase][quietlyCloseConnection][134]-> HikariCPDatasource - Closing connection com.mysql.cj.jdbc.ConnectionImpl@57504179: (connection evicted)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.PoolBase][quietlyCloseConnection][134]-> HikariCPDatasource - Closing connection com.mysql.cj.jdbc.ConnectionImpl@69b409e6: (connection evicted)
+2025-07-18 20:31:24 [DEBUG][com.zaxxer.hikari.pool.HikariPool][logPoolState][421]-> HikariCPDatasource - After shutdown stats (total=0, active=0, idle=0, waiting=0)
+2025-07-18 20:31:24 [INFO][com.zaxxer.hikari.HikariDataSource][close][352]-> HikariCPDatasource - Shutdown completed.
