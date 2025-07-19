@@ -113,7 +113,7 @@ const router = createRouter({
     // GitHub登录回调页面
     {
       path: '/githublogincallback',
-     // name: "GitHub登录回调",
+      // name: "GitHub登录回调",
       name: 'GitHubLoginCallback',
       //component: () => import('@/views/GitHubLoginCallback.vue'),
       component: () => import('@/views/GitHubLoginCallback.vue'),
@@ -123,16 +123,43 @@ const router = createRouter({
 
 /**
  * 全局前置守卫
- * 在每次路由跳转前执行，用于检查用户登录状态
+ * 在每次路由跳转前执行，用于检查用户登录状态和权限验证
+ * 
+ * @param {Object} to - 即将要进入的目标路由对象
+ * @param {Object} from - 当前导航正要离开的路由对象
+ * @param {Function} next - 调用该方法来resolve这个钩子，执行效果依赖next方法的调用参数
  */
-router.beforeEach((to, from, next) => {
-  // 从Cookie中获取用户信息
+router.beforeEach((to, _from, next) => {
+  // 从Cookie中获取用户登录信息
+  // userInfo包含用户ID、昵称、头像等基本信息
   const userInfo = VueCookies.get("userInfo");
-  // 如果路由需要登录但用户未登录，则跳转到登录页
+
+  /**
+   * 检查路由是否需要登录验证
+   * 条件说明：
+   * 1. to.meta.needLogin != null - 路由元信息中定义了needLogin字段
+   * 2. to.meta.needLogin === true - 该路由需要登录才能访问
+   * 3. userInfo == null - 用户未登录（Cookie中没有用户信息）
+   */
   if (to.meta.needLogin != null && to.meta.needLogin && userInfo == null) {
-    router.push("/login");
+    /**
+     * 用户未登录但访问需要登录的页面时：
+     * 1. 重定向到登录页面
+     * 2. 通过redirectUrl参数保存用户原本想访问的页面路径
+     * 3. 用户登录成功后会自动跳转回原始页面，提升用户体验
+     * 
+     * 示例：
+     * 用户访问 /main/files -> 重定向到 /login?redirectUrl=/main/files
+     * 登录成功后自动跳转回 /main/files
+     */
+    router.push("/login?redirectUrl=" + to.path);
+    return; // 阻止继续执行，因为已经重定向了
   }
-  // 继续路由跳转
+
+  /**
+   * 继续路由跳转
+   * 如果用户已登录或访问的是不需要登录的页面，则正常跳转
+   */
   next();
 })
 
