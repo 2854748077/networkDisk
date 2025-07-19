@@ -44,7 +44,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-
 /**
  * 用户信息 业务接口实现
  */
@@ -95,7 +94,8 @@ public class UserInfoServiceImpl implements UserInfoService {
         SimplePage page = new SimplePage(param.getPageNo(), count, pageSize);
         param.setSimplePage(page);
         List<UserInfo> list = this.findListByParam(param);
-        PaginationResultVO<UserInfo> result = new PaginationResultVO(count, page.getPageSize(), page.getPageNo(), page.getPageTotal(), list);
+        PaginationResultVO<UserInfo> result = new PaginationResultVO(count, page.getPageSize(), page.getPageNo(),
+                page.getPageTotal(), list);
         return result;
     }
 
@@ -225,7 +225,6 @@ public class UserInfoServiceImpl implements UserInfoService {
         return this.userInfoMapper.deleteByQqOpenId(qqOpenId);
     }
 
-
     @Override
     public SessionWebUserDto login(String email, String password) {
         UserInfo userInfo = this.userInfoMapper.selectByEmail(email);
@@ -246,7 +245,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         } else {
             sessionWebUserDto.setAdmin(false);
         }
-        //用户空间
+        // 用户空间
         UserSpaceDto userSpaceDto = new UserSpaceDto();
         userSpaceDto.setUseSpace(fileInfoService.getUserUseSpace(userInfo.getUserId()));
         userSpaceDto.setTotalSpace(userInfo.getTotalSpace());
@@ -265,7 +264,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         if (null != nickNameUser) {
             throw new BusinessException("昵称已经存在");
         }
-        //校验邮箱验证码
+        // 校验邮箱验证码
         emailCodeService.checkCode(email, emailCode);
         String userId = StringTools.getRandomNumber(Constants.LENGTH_10);
         userInfo = new UserInfo();
@@ -288,14 +287,13 @@ public class UserInfoServiceImpl implements UserInfoService {
         if (null == userInfo) {
             throw new BusinessException("邮箱账号不存在");
         }
-        //校验邮箱验证码
+        // 校验邮箱验证码
         emailCodeService.checkCode(email, emailCode);
 
         UserInfo updateInfo = new UserInfo();
         updateInfo.setPassword(StringTools.encodeByMD5(password));
         this.userInfoMapper.updateByEmail(updateInfo, email);
     }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -321,10 +319,11 @@ public class UserInfoServiceImpl implements UserInfoService {
 
             String nickName = qqInfo.getNickname();
             nickName = nickName.length() > Constants.LENGTH_150 ? nickName.substring(0, 150) : nickName;
-            avatar = StringTools.isEmpty(qqInfo.getFigureurl_qq_2()) ? qqInfo.getFigureurl_qq_1() : qqInfo.getFigureurl_qq_2();
+            avatar = StringTools.isEmpty(qqInfo.getFigureurl_qq_2()) ? qqInfo.getFigureurl_qq_1()
+                    : qqInfo.getFigureurl_qq_2();
             Date curDate = new Date();
 
-            //上传头像到本地
+            // 上传头像到本地
             user.setQqOpenId(openId);
             user.setJoinTime(curDate);
             user.setNickName(nickName);
@@ -349,7 +348,8 @@ public class UserInfoServiceImpl implements UserInfoService {
         sessionWebUserDto.setUserId(user.getUserId());
         sessionWebUserDto.setNickName(user.getNickName());
         sessionWebUserDto.setAvatar(avatar);
-        if (ArrayUtils.contains(appConfig.getAdminEmails().split(","), user.getEmail() == null ? "" : user.getEmail())) {
+        if (ArrayUtils.contains(appConfig.getAdminEmails().split(","),
+                user.getEmail() == null ? "" : user.getEmail())) {
             sessionWebUserDto.setAdmin(true);
         } else {
             sessionWebUserDto.setAdmin(false);
@@ -364,13 +364,16 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     private String getQQAccessToken(String code) {
         /**
-         * 返回结果是字符串 access_token=*&expires_in=7776000&refresh_token=* 返回错误 callback({UcWebConstants.VIEW_OBJ_RESULT_KEY:111,error_description:"error msg"})
+         * 返回结果是字符串 access_token=*&expires_in=7776000&refresh_token=* 返回错误
+         * callback({UcWebConstants.VIEW_OBJ_RESULT_KEY:111,error_description:"error
+         * msg"})
          */
         String accessToken = null;
         String url = null;
         try {
-            url = String.format(appConfig.getQqUrlAccessToken(), appConfig.getQqAppId(), appConfig.getQqAppKey(), code, URLEncoder.encode(appConfig
-                    .getQqUrlRedirect(), "utf-8"));
+            url = String.format(appConfig.getQqUrlAccessToken(), appConfig.getQqAppId(), appConfig.getQqAppKey(), code,
+                    URLEncoder.encode(appConfig
+                            .getQqUrlRedirect(), "utf-8"));
         } catch (UnsupportedEncodingException e) {
             logger.error("encode失败");
         }
@@ -391,7 +394,6 @@ public class UserInfoServiceImpl implements UserInfoService {
         return accessToken;
     }
 
-
     private String getQQOpenId(String accessToken) throws BusinessException {
         // 获取openId
         String url = String.format(appConfig.getQqUrlOpenId(), accessToken);
@@ -408,7 +410,6 @@ public class UserInfoServiceImpl implements UserInfoService {
         }
         return String.valueOf(jsonData.get("openid"));
     }
-
 
     private QQInfoDto getQQUserInfo(String accessToken, String qqOpenId) throws BusinessException {
         String url = String.format(appConfig.getQqUrlUserInfo(), accessToken, appConfig.getQqAppId(), qqOpenId);
@@ -446,15 +447,15 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public SessionWebUserDto githubLogin(String code) {                      // GitHub登录
-        String accessToken = getGitHubAccessToken(code);                      // 获取GitHub的access_token
-        GitHubInfoDto githubInfo = getGitHubUserInfo(accessToken);            // 获取GitHub用户信息
-        
+    public SessionWebUserDto githubLogin(String code) { // GitHub登录
+        String accessToken = getGitHubAccessToken(code); // 获取GitHub的access_token
+        GitHubInfoDto githubInfo = getGitHubUserInfo(accessToken); // 获取GitHub用户信息
+
         // 使用GitHub ID作为唯一标识
-        String githubId = String.valueOf(githubInfo.getId());                // GitHub ID
-        UserInfo user = this.userInfoMapper.selectByQqOpenId(githubId);       // 根据GitHub ID查询用户
-        
-        if (null == user) {                                                   //下面是判断用户是否存在，存在更新信息，不存在创建新用户并存入数据库
+        String githubId = String.valueOf(githubInfo.getId()); // GitHub ID
+        UserInfo user = this.userInfoMapper.selectByQqOpenId(githubId); // 根据GitHub ID查询用户
+
+        if (null == user) { // 下面是判断用户是否存在，存在更新信息，不存在创建新用户并存入数据库
             // 创建新用户
             user = new UserInfo();
             String nickName = githubInfo.getName();
@@ -462,7 +463,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                 nickName = githubInfo.getLogin();
             }
             nickName = nickName.length() > Constants.LENGTH_150 ? nickName.substring(0, 150) : nickName;
-            
+
             user.setQqOpenId(githubId);
             user.setJoinTime(new Date());
             user.setNickName(nickName);
@@ -481,89 +482,91 @@ public class UserInfoServiceImpl implements UserInfoService {
             updateInfo.setLastLoginTime(new Date());
             this.userInfoMapper.updateByQqOpenId(updateInfo, githubId);
         }
-        
+
         if (UserStatusEnum.DISABLE.getStatus().equals(user.getStatus())) {
             throw new BusinessException("账号被禁用无法登录");
         }
-        
-        SessionWebUserDto sessionWebUserDto = new SessionWebUserDto();                           //创建存储用户基本信息的SessionWebUserDto对象
+
+        SessionWebUserDto sessionWebUserDto = new SessionWebUserDto(); // 创建存储用户基本信息的SessionWebUserDto对象
         sessionWebUserDto.setUserId(user.getUserId());
         sessionWebUserDto.setNickName(user.getNickName());
         sessionWebUserDto.setAvatar(user.getQqAvatar());
-        sessionWebUserDto.setAdmin(ArrayUtils.contains(appConfig.getAdminEmails().split(","), user.getEmail() == null ? "" : user.getEmail()));
+        sessionWebUserDto.setAdmin(ArrayUtils.contains(appConfig.getAdminEmails().split(","),
+                user.getEmail() == null ? "" : user.getEmail()));
 
-        UserSpaceDto userSpaceDto = new UserSpaceDto();                               //创建存储用户空间信息的UserSpaceDto对象
+        UserSpaceDto userSpaceDto = new UserSpaceDto(); // 创建存储用户空间信息的UserSpaceDto对象
         userSpaceDto.setUseSpace(fileInfoService.getUserUseSpace(user.getUserId()));
         userSpaceDto.setTotalSpace(user.getTotalSpace());
         redisComponent.saveUserSpaceUse(user.getUserId(), userSpaceDto);
-        return sessionWebUserDto;                                                           //返回用户信息
+        return sessionWebUserDto; // 返回用户信息
     }
 
-    private String getGitHubAccessToken(String code) {             // 获取GitHub的access_token
+    private String getGitHubAccessToken(String code) {
         try {
-            String url = "https://github.com/login/oauth/access_token";
-            Map<String, String> params = new HashMap<>();
-            params.put("client_id", appConfig.getGithubAppId());
-            params.put("client_secret", appConfig.getGithubAppSecret());
-            params.put("code", code);
-            params.put("redirect_uri", appConfig.getGithubUrlRedirect());
-            
-            // 向GitHub的Token端点发送POST请求
-            String tokenResult = OKHttpUtils.postRequest(url, params);
-            if (StringUtils.isNotBlank(tokenResult)) {
-                String[] paramPairs = tokenResult.split("&");          
-                for (String p : paramPairs) {
-                    if (p.startsWith("access_token=")) {
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .build();
 
-                        //返回token具体值  
-                        return p.substring("access_token=".length());
-                    }
-                }
-            }
-            throw new BusinessException("获取GitHub Token失败");
+            String json = String.format(
+                    "{\"client_id\":\"%s\",\"client_secret\":\"%s\",\"code\":\"%s\",\"redirect_uri\":\"%s\"}",
+                    appConfig.getGithubAppId(), appConfig.getGithubAppSecret(), code, appConfig.getGithubUrlRedirect());
+
+            Request request = new Request.Builder()
+                    .url("https://github.com/login/oauth/access_token")
+                    .post(okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), json))
+                    .addHeader("Accept", "application/json")
+                    .build();
+
+            String response = client.newCall(request).execute().body().string();
+            Map<String, Object> tokenMap = JsonUtils.convertJson2Obj(response, Map.class);
+            return (String) tokenMap.get("access_token");
         } catch (Exception e) {
-            logger.error("GitHub Token请求失败", e);
+            logger.error("GitHub登录失败", e);
             throw new BusinessException("GitHub登录失败");
         }
     }
 
     /**
- * 获取GitHub登录后的用户信息
- * 使用access_token调用GitHub API获取用户详细信息
- * 
- * @param accessToken GitHub访问令牌
- * @return GitHubInfoDto GitHub用户信息对象
- * @throws BusinessException 获取用户信息失败时抛出业务异常
- */
+     * 获取GitHub登录后的用户信息
+     * 使用access_token调用GitHub API获取用户详细信息
+     * 
+     * @param accessToken GitHub访问令牌
+     * @return GitHubInfoDto GitHub用户信息对象
+     * @throws BusinessException 获取用户信息失败时抛出业务异常
+     */
     private GitHubInfoDto getGitHubUserInfo(String accessToken) throws BusinessException {
         try {
             // 1. 设置GitHub用户信息API端点
             String url = "https://api.github.com/user";
-            // 2. 创建HTTP客户端，设置超时时间
+            // 2. 创建HTTP客户端，使用更长的超时时间
             OkHttpClient client = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
                     .build();
             // 3. 构建HTTP请求
             Request request = new Request.Builder()
                     .url(url) // 设置请求URL
                     // 设置授权头：GitHub API需要Bearer Token认证
                     .addHeader("Authorization", "token " + accessToken)
-                     // 设置接受的响应格式：GitHub API v3版本的JSON格式
+                    // 设置接受的响应格式：GitHub API v3版本的JSON格式
                     .addHeader("Accept", "application/vnd.github.v3+json")
+                    .addHeader("User-Agent", "EasyPan-App")
                     .build();
-            //执行HTTP请求
+            // 执行HTTP请求
             Response response = client.newCall(request).execute();
 
             if (response.isSuccessful() && response.body() != null) {
-                String result = response.body().string();      
-                //获取响应体JSON字符串
+                String result = response.body().string();
+                // 获取响应体JSON字符串
                 GitHubInfoDto githubInfo = JsonUtils.convertJson2Obj(result, GitHubInfoDto.class);
-                //验证用户信息的有效性
+                // 验证用户信息的有效性
                 if (githubInfo == null || StringTools.isEmpty(githubInfo.getLogin())) {
                     throw new BusinessException("获取GitHub用户信息失败");
                 }
-                return githubInfo;
+                return githubInfo;// 返回解析成功的用户信息
             }
             throw new BusinessException("获取GitHub用户信息失败");
         } catch (Exception e) {

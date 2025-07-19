@@ -17,6 +17,11 @@ public class OKHttpUtils {
      * 请求超时时间10秒
      */
     private static final int TIME_OUT_SECONDS = 10;
+    
+    /**
+     * GitHub OAuth请求超时时间30秒
+     */
+    private static final int GITHUB_TIMEOUT_SECONDS = 30;
 
     private static Logger logger = LoggerFactory.getLogger(OKHttpUtils.class);
 
@@ -27,6 +32,16 @@ public class OKHttpUtils {
                 .connectTimeout(TIME_OUT_SECONDS, TimeUnit.SECONDS)
                 .readTimeout(TIME_OUT_SECONDS, TimeUnit.SECONDS)
                 .writeTimeout(TIME_OUT_SECONDS, TimeUnit.SECONDS);
+        return clientBuilder;
+    }
+
+    private static OkHttpClient.Builder getGitHubClientBuilder() {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                .followRedirects(false)
+                .retryOnConnectionFailure(true)
+                .connectTimeout(GITHUB_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(GITHUB_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(GITHUB_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         return clientBuilder;
     }
 
@@ -125,6 +140,56 @@ public class OKHttpUtils {
         } catch (Exception e) {
             logger.error("OKhttp POST 请求异常,url:{},请求参数：{}", url, JsonUtils.convertObj2Json(params), e);
             return null;
+        } finally {
+            if (body != null) {
+                body.close();
+            }
+        }
+    }
+
+    /**
+     * GitHub OAuth专用POST请求，使用更长的超时时间和正确的请求头
+     */
+    public static String postGitHubRequest(String url, Map<String, String> params) throws BusinessException {
+        ResponseBody body = null;
+        try {
+            if (params == null) {
+                params = new HashMap<>();
+            }
+            
+            // 使用GitHub专用的客户端配置
+            OkHttpClient.Builder clientBuilder = getGitHubClientBuilder();
+            OkHttpClient client = clientBuilder.build();
+            
+            // 构建表单请求体
+            FormBody.Builder builder = new FormBody.Builder();
+            for (Map.Entry<String, String> map : params.entrySet()) {
+                String key = map.getKey();
+                String value = map.getValue() == null ? "" : map.getValue();
+                builder.add(key, value);
+            }
+            RequestBody requestBody = builder.build();
+
+            // 构建请求，添加GitHub API需要的请求头
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .addHeader("Accept", "application/json")
+                    .addHeader("User-Agent", "EasyPan-App");
+            
+            Request request = requestBuilder.build();
+            Response response = client.newCall(request).execute();
+            body = response.body();
+            String responseStr = body.string();
+            
+            logger.info("GitHub OAuth请求地址:{},参数:{},返回信息:{}", url, JsonUtils.convertObj2Json(params), responseStr);
+            return responseStr;
+        } catch (SocketTimeoutException | ConnectException e) {
+            logger.error("GitHub OAuth请求超时,url:{},请求参数：{}", url, JsonUtils.convertObj2Json(params), e);
+            throw new BusinessException("GitHub服务连接超时，请稍后重试");
+        } catch (Exception e) {
+            logger.error("GitHub OAuth请求异常,url:{},请求参数：{}", url, JsonUtils.convertObj2Json(params), e);
+            throw new BusinessException("GitHub登录服务异常");
         } finally {
             if (body != null) {
                 body.close();
