@@ -2,22 +2,11 @@
   <div class="login-body">
     <div class="bg"></div>
     <div class="login-panel">
-      <el-form
-        class="login-register"
-        :model="formData"
-        :rules="rules"
-        ref="formDataRef"
-      >
+      <el-form class="login-register" :model="formData" :rules="rules" ref="formDataRef">
         <div class="login-title">极简网盘</div>
         <!--input输入-->
         <el-form-item prop="email">
-          <el-input
-            size="large"
-            clearable
-            placeholder="请输入邮箱"
-            v-model.trim="formData.email"
-            maxLength="150"
-          >
+          <el-input size="large" clearable placeholder="请输入邮箱" v-model.trim="formData.email" maxLength="150">
             <template #prefix>
               <span class="iconfont icon-account"></span>
             </template>
@@ -25,13 +14,7 @@
         </el-form-item>
         <!--登录密码-->
         <el-form-item prop="password" v-if="opType == 1">
-          <el-input
-            type="password"
-            size="large"
-            placeholder="请输入密码"
-            v-model.trim="formData.password"
-            show-password
-          >
+          <el-input type="password" size="large" placeholder="请输入密码" v-model.trim="formData.password" show-password>
             <template #prefix>
               <span class="iconfont icon-password"></span>
             </template>
@@ -41,22 +24,12 @@
         <div v-if="opType == 0 || opType == 2">
           <el-form-item prop="emailCode">
             <div class="send-emali-panel">
-              <el-input
-                size="large"
-                placeholder="请输入邮箱验证码"
-                v-model.trim="formData.emailCode"
-              >
+              <el-input size="large" placeholder="请输入邮箱验证码" v-model.trim="formData.emailCode">
                 <template #prefix>
                   <span class="iconfont icon-checkcode"></span>
                 </template>
               </el-input>
-              <el-button
-                class="send-mail-btn"
-                type="primary"
-                size="large"
-                @click="getEmailCode"
-                >获取验证码</el-button
-              >
+              <el-button class="send-mail-btn" type="primary" size="large" @click="getEmailCode">获取验证码</el-button>
             </div>
             <el-popover placement="left" :width="500" trigger="click">
               <div>
@@ -67,46 +40,28 @@
                 </p>
               </div>
               <template #reference>
-                <span class="a-link" :style="{ 'font-size': '14px' }"
-                  >未收到邮箱验证码？</span
-                >
+                <span class="a-link" :style="{ 'font-size': '14px' }">未收到邮箱验证码？</span>
               </template>
             </el-popover>
           </el-form-item>
           <el-form-item prop="nickName" v-if="opType == 0">
-            <el-input
-              size="large"
-              clearable
-              placeholder="请输入昵称"
-              v-model.trim="formData.nickName"
-              maxLength="20"
-            >
+            <el-input size="large" clearable placeholder="请输入昵称" v-model.trim="formData.nickName" maxLength="20">
               <template #prefix>
                 <span class="iconfont icon-account"></span>
               </template>
             </el-input>
           </el-form-item>
           <el-form-item prop="registerPassword">
-            <el-input
-              type="password"
-              size="large"
-              placeholder="请输入密码"
-              v-model.trim="formData.registerPassword"
-              show-password
-            >
+            <el-input type="password" size="large" placeholder="请输入密码" v-model.trim="formData.registerPassword"
+              show-password>
               <template #prefix>
                 <span class="iconfont icon-password"></span>
               </template>
             </el-input>
           </el-form-item>
           <el-form-item prop="reRegisterPassword">
-            <el-input
-              type="password"
-              size="large"
-              placeholder="请再次输入密码"
-              v-model.trim="formData.reRegisterPassword"
-              show-password
-            >
+            <el-input type="password" size="large" placeholder="请再次输入密码" v-model.trim="formData.reRegisterPassword"
+              show-password>
               <template #prefix>
                 <span class="iconfont icon-password"></span>
               </template>
@@ -115,21 +70,12 @@
         </div>
         <el-form-item prop="checkCode">
           <div class="check-code-panel">
-            <el-input
-              size="large"
-              placeholder="请输入验证码"
-              v-model.trim="formData.checkCode"
-              @keyup.enter="doSubmit"
-            >
+            <el-input size="large" placeholder="请输入验证码" v-model.trim="formData.checkCode" @keyup.enter="doSubmit">
               <template #prefix>
                 <span class="iconfont icon-checkcode"></span>
               </template>
             </el-input>
-            <img
-              :src="checkCodeUrl"
-              class="check-code"
-              @click="changeCheckCode(0)"
-            />
+            <img :src="checkCodeUrl" class="check-code" @click="changeCheckCode(0)" />
           </div>
         </el-form-item>
         <el-form-item v-if="opType == 1">
@@ -137,77 +83,50 @@
             <el-checkbox v-model="formData.rememberMe">记住我</el-checkbox>
           </div>
           <div class="no-account">
-            <a href="javascript:void(0)" class="a-link" @click="showPanel(2)"
-              >忘记密码？</a
-            >
-            <a href="javascript:void(0)" class="a-link" @click="showPanel(0)"
-              >没有账号？</a
-            >
+            <a href="javascript:void(0)" class="a-link" @click="showPanel(2)">忘记密码？</a>
+            <a href="javascript:void(0)" class="a-link" @click="showPanel(0)">没有账号？</a>
           </div>
         </el-form-item>
         <el-form-item v-if="opType == 0">
-          <a href="javascript:void(0)" class="a-link" @click="showPanel(1)"
-            >已有账号?</a
-          >
+          <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">已有账号?</a>
         </el-form-item>
         <el-form-item v-if="opType == 2">
-          <a href="javascript:void(0)" class="a-link" @click="showPanel(1)"
-            >去登录?</a
-          >
+          <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">去登录?</a>
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            class="op-btn"
-            @click="doSubmit"
-            size="large"
-          >
+          <el-button type="primary" class="op-btn" @click="doSubmit" size="large">
             <span v-if="opType == 0">注册</span>
             <span v-if="opType == 1">登录</span>
             <span v-if="opType == 2">重置密码</span>
           </el-button>
         </el-form-item>
         <div class="login-btn-qq" v-if="opType == 1">
-          快捷登录 <img src="@/assets/qq.png" @click="qqLogin" />
-          <img src="@/assets/github.png" @click="githubLogin" style="margin-left: 10px; width: 20px; cursor: pointer;" title="GitHub登录" />
+          快捷登录
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#24292e" @click="githubLogin"
+            style="cursor: pointer; margin-left: 10px;">
+            <path
+              d="M12 0C5.374 0 0 5.373 0 12C0 17.302 3.438 21.8 8.207 23.387C8.806 23.498 9.025 23.126 9.025 22.81C9.025 22.524 9.015 21.749 9.01 20.732C5.672 21.489 4.968 19.15 4.968 19.15C4.421 17.777 3.634 17.407 3.634 17.407C2.545 16.659 3.717 16.675 3.717 16.675C4.922 16.759 5.556 17.912 5.556 17.912C6.626 19.746 8.363 19.216 9.048 18.909C9.155 18.134 9.466 17.604 9.81 17.305C7.145 17 4.343 15.971 4.343 11.374C4.343 10.063 4.812 8.993 5.579 8.153C5.455 7.85 5.044 6.629 5.696 4.977C5.696 4.977 6.704 4.655 8.997 6.207C9.954 5.941 10.98 5.808 12 5.803C13.02 5.808 14.047 5.941 15.006 6.207C17.297 4.655 18.303 4.977 18.303 4.977C18.956 6.63 18.545 7.851 18.421 8.153C19.191 8.993 19.656 10.064 19.656 11.374C19.656 15.983 16.849 16.998 14.177 17.295C14.607 17.667 15.002 18.397 15.002 19.517C15.002 21.132 14.988 22.436 14.988 22.81C14.988 23.129 15.204 23.504 15.813 23.386C20.565 21.797 24 17.3 24 12C24 5.373 18.627 0 12 0Z" />
+          </svg>
         </div>
       </el-form>
     </div>
     <!--发送邮箱验证码-->
-    <Dialog
-      :show="dialogConfig4SendMailCode.show"
-      :title="dialogConfig4SendMailCode.title"
-      :buttons="dialogConfig4SendMailCode.buttons"
-      width="500px"
-      :showCancel="false"
-      @close="dialogConfig4SendMailCode.show = false"
-    >
-      <el-form
-        :model="formData4SendMailCode"
-        :rules="rules"
-        ref="formData4SendMailCodeRef"
-        label-width="80px"
-        @submit.prevent
-      >
+    <Dialog :show="dialogConfig4SendMailCode.show" :title="dialogConfig4SendMailCode.title"
+      :buttons="dialogConfig4SendMailCode.buttons" width="500px" :showCancel="false"
+      @close="dialogConfig4SendMailCode.show = false">
+      <el-form :model="formData4SendMailCode" :rules="rules" ref="formData4SendMailCodeRef" label-width="80px"
+        @submit.prevent>
         <el-form-item label="邮箱">
           {{ formData.email }}
         </el-form-item>
         <el-form-item label="验证码" prop="checkCode">
           <div class="check-code-panel">
-            <el-input
-              size="large"
-              placeholder="请输入验证码"
-              v-model.trim="formData4SendMailCode.checkCode"
-            >
+            <el-input size="large" placeholder="请输入验证码" v-model.trim="formData4SendMailCode.checkCode">
               <template #prefix>
                 <span class="iconfont icon-checkcode"></span>
               </template>
             </el-input>
-            <img
-              :src="checkCodeUrl4SendMailCode"
-              class="check-code"
-              @click="changeCheckCode(1)"
-            />
+            <img :src="checkCodeUrl4SendMailCode" class="check-code" @click="changeCheckCode(1)" />
           </div>
         </el-form-item>
       </el-form>
@@ -470,6 +389,7 @@ const githubLogin = async () => {
   background-size: cover;
   background: url("../assets/login_bg.jpg");
   display: flex;
+
   .bg {
     flex: 1;
     background-size: cover;
@@ -478,36 +398,44 @@ const githubLogin = async () => {
     background-repeat: no-repeat;
     background-image: url("../assets/login_img.png");
   }
+
   .login-panel {
     width: 430px;
     margin-right: 15%;
     margin-top: calc((100vh - 500px) / 2);
+
     .login-register {
       padding: 25px;
       background: #fff;
       border-radius: 5px;
+
       .login-title {
         text-align: center;
         font-size: 18px;
         font-weight: bold;
         margin-bottom: 20px;
       }
+
       .send-emali-panel {
         display: flex;
         width: 100%;
         justify-content: space-between;
+
         .send-mail-btn {
           margin-left: 5px;
         }
       }
+
       .rememberme-panel {
         width: 100%;
       }
+
       .no-account {
         width: 100%;
         display: flex;
         justify-content: space-between;
       }
+
       .op-btn {
         width: 100%;
       }
@@ -517,17 +445,20 @@ const githubLogin = async () => {
   .check-code-panel {
     width: 100%;
     display: flex;
+
     .check-code {
       margin-left: 5px;
       cursor: pointer;
     }
   }
+
   .login-btn-qq {
     margin-top: 20px;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+
     img {
       cursor: pointer;
       margin-left: 10px;

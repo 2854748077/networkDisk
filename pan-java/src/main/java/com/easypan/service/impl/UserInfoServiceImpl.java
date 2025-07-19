@@ -446,15 +446,15 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public SessionWebUserDto githubLogin(String code) {
-        String accessToken = getGitHubAccessToken(code);
-        GitHubInfoDto githubInfo = getGitHubUserInfo(accessToken);
+    public SessionWebUserDto githubLogin(String code) {                      // GitHub登录
+        String accessToken = getGitHubAccessToken(code);                      // 获取GitHub的access_token
+        GitHubInfoDto githubInfo = getGitHubUserInfo(accessToken);            // 获取GitHub用户信息
         
         // 使用GitHub ID作为唯一标识
-        String githubId = String.valueOf(githubInfo.getId());
-        UserInfo user = this.userInfoMapper.selectByQqOpenId(githubId);
+        String githubId = String.valueOf(githubInfo.getId());                // GitHub ID
+        UserInfo user = this.userInfoMapper.selectByQqOpenId(githubId);       // 根据GitHub ID查询用户
         
-        if (null == user) {
+        if (null == user) {                                                   //下面是判断用户是否存在，存在更新信息，不存在创建新用户并存入数据库
             // 创建新用户
             user = new UserInfo();
             String nickName = githubInfo.getName();
@@ -486,20 +486,20 @@ public class UserInfoServiceImpl implements UserInfoService {
             throw new BusinessException("账号被禁用无法登录");
         }
         
-        SessionWebUserDto sessionWebUserDto = new SessionWebUserDto();
+        SessionWebUserDto sessionWebUserDto = new SessionWebUserDto();                           //创建存储用户基本信息的SessionWebUserDto对象
         sessionWebUserDto.setUserId(user.getUserId());
         sessionWebUserDto.setNickName(user.getNickName());
         sessionWebUserDto.setAvatar(user.getQqAvatar());
         sessionWebUserDto.setAdmin(ArrayUtils.contains(appConfig.getAdminEmails().split(","), user.getEmail() == null ? "" : user.getEmail()));
 
-        UserSpaceDto userSpaceDto = new UserSpaceDto();
+        UserSpaceDto userSpaceDto = new UserSpaceDto();                               //创建存储用户空间信息的UserSpaceDto对象
         userSpaceDto.setUseSpace(fileInfoService.getUserUseSpace(user.getUserId()));
         userSpaceDto.setTotalSpace(user.getTotalSpace());
         redisComponent.saveUserSpaceUse(user.getUserId(), userSpaceDto);
-        return sessionWebUserDto;
+        return sessionWebUserDto;                                                           //返回用户信息
     }
 
-    private String getGitHubAccessToken(String code) {
+    private String getGitHubAccessToken(String code) {             // 获取GitHub的access_token
         try {
             String url = "https://github.com/login/oauth/access_token";
             Map<String, String> params = new HashMap<>();
@@ -508,11 +508,14 @@ public class UserInfoServiceImpl implements UserInfoService {
             params.put("code", code);
             params.put("redirect_uri", appConfig.getGithubUrlRedirect());
             
+            // 向GitHub的Token端点发送POST请求
             String tokenResult = OKHttpUtils.postRequest(url, params);
             if (StringUtils.isNotBlank(tokenResult)) {
-                String[] paramPairs = tokenResult.split("&");
+                String[] paramPairs = tokenResult.split("&");          
                 for (String p : paramPairs) {
                     if (p.startsWith("access_token=")) {
+
+                        //返回token具体值  
                         return p.substring("access_token=".length());
                     }
                 }
@@ -524,24 +527,39 @@ public class UserInfoServiceImpl implements UserInfoService {
         }
     }
 
+    /**
+ * 获取GitHub登录后的用户信息
+ * 使用access_token调用GitHub API获取用户详细信息
+ * 
+ * @param accessToken GitHub访问令牌
+ * @return GitHubInfoDto GitHub用户信息对象
+ * @throws BusinessException 获取用户信息失败时抛出业务异常
+ */
     private GitHubInfoDto getGitHubUserInfo(String accessToken) throws BusinessException {
         try {
+            // 1. 设置GitHub用户信息API端点
             String url = "https://api.github.com/user";
+            // 2. 创建HTTP客户端，设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(10, TimeUnit.SECONDS)
                     .build();
-            
+            // 3. 构建HTTP请求
             Request request = new Request.Builder()
-                    .url(url)
+                    .url(url) // 设置请求URL
+                    // 设置授权头：GitHub API需要Bearer Token认证
                     .addHeader("Authorization", "token " + accessToken)
+                     // 设置接受的响应格式：GitHub API v3版本的JSON格式
                     .addHeader("Accept", "application/vnd.github.v3+json")
                     .build();
-            
+            //执行HTTP请求
             Response response = client.newCall(request).execute();
+
             if (response.isSuccessful() && response.body() != null) {
-                String result = response.body().string();
+                String result = response.body().string();      
+                //获取响应体JSON字符串
                 GitHubInfoDto githubInfo = JsonUtils.convertJson2Obj(result, GitHubInfoDto.class);
+                //验证用户信息的有效性
                 if (githubInfo == null || StringTools.isEmpty(githubInfo.getLogin())) {
                     throw new BusinessException("获取GitHub用户信息失败");
                 }

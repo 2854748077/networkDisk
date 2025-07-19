@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite --mode dev",
     "build": "vite build --mode build",
-    "preview": "vite preview"
+    "build:prod": "vite build --mode production",
+    "preview": "vite preview",
+    "deploy": "npm run build:prod"
   },
   "codeversion":"7150466445",
   "dependencies": {

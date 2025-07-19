@@ -292,15 +292,15 @@ public class AccountController extends ABaseController {
 
     @RequestMapping("githublogin")
     @GlobalInterceptor(checkLogin = false, checkParams = true)
-    public ResponseVO githxublogin(HttpSession session, String callbackUrl) throws UnsupportedEncodingException {
+    public ResponseVO githublogin(HttpSession session, String callbackUrl) throws UnsupportedEncodingException {
         String state = StringTools.getRandomString(Constants.LENGTH_30);
         if (!StringTools.isEmpty(callbackUrl)) {
             session.setAttribute(state, callbackUrl);
         }
-        String url = String.format(appConfig.getGithubUrlAuthorization(), 
-                appConfig.getGithubAppId(), 
-                URLEncoder.encode(appConfig.getGithubUrlRedirect(), "utf-8"), 
-                state);
+        String url = String.format(appConfig.getGithubUrlAuthorization(),             // github授权登录页面URL模板
+                appConfig.getGithubAppId(),                                           //Client ID
+                URLEncoder.encode(appConfig.getGithubUrlRedirect(), "utf-8"),   //redirect_uri
+                state);                                                                // state
         return getSuccessResponseVO(url);
     }
 
@@ -310,11 +310,11 @@ public class AccountController extends ABaseController {
                                          @VerifyParam(required = true) String code,
                                          @VerifyParam(required = true) String state) {
         try {
-            SessionWebUserDto sessionWebUserDto = userInfoService.githubLogin(code);
-            session.setAttribute(Constants.SESSION_KEY, sessionWebUserDto);
-            Map<String, Object> result = new HashMap<>();
-            result.put("callbackUrl", session.getAttribute(state));
-            result.put("userInfo", sessionWebUserDto);
+            SessionWebUserDto sessionWebUserDto = userInfoService.githubLogin(code);   //获取GitHub登录后的用户信息
+            session.setAttribute(Constants.SESSION_KEY, sessionWebUserDto);            //保存用户信息到session中
+            Map<String, Object> result = new HashMap<>();                             //返回结果
+            result.put("callbackUrl", session.getAttribute(state));                   //回调URL（最初想要访问界面）
+            result.put("userInfo", sessionWebUserDto);                                //用户信息
             return getSuccessResponseVO(result);
         } catch (Exception e) {
             logger.error("GitHub登录失败", e);
