@@ -503,23 +503,27 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     private String getGitHubAccessToken(String code) {
         try {
+
+            //创建HTTP客户端
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .build();
-
+            //创建请求体
             String json = String.format(
                     "{\"client_id\":\"%s\",\"client_secret\":\"%s\",\"code\":\"%s\",\"redirect_uri\":\"%s\"}",
                     appConfig.getGithubAppId(), appConfig.getGithubAppSecret(), code, appConfig.getGithubUrlRedirect());
-
+            //构建http请求
             Request request = new Request.Builder()
                     .url("https://github.com/login/oauth/access_token")
                     .post(okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), json))
                     .addHeader("Accept", "application/json")
                     .build();
-
+            //发送http请求
             String response = client.newCall(request).execute().body().string();
+            //解析响应
             Map<String, Object> tokenMap = JsonUtils.convertJson2Obj(response, Map.class);
+            //返回access_token
             return (String) tokenMap.get("access_token");
         } catch (Exception e) {
             logger.error("GitHub登录失败", e);
