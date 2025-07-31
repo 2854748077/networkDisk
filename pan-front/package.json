@@ -7,9 +7,12 @@
     "build": "vite build --mode build",
     "build:prod": "vite build --mode production",
     "preview": "vite preview",
-    "deploy": "npm run build:prod"
+    "deploy": "npm run build:prod",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui"
   },
-  "codeversion":"7150466445",
+  "codeversion": "7150466445",
   "dependencies": {
     "@highlightjs/vue-plugin": "^2.1.0",
     "@moefe/vue-aplayer": "^2.0.0-beta.5",
@@ -35,6 +38,9 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
-    "vite": "^4.1.4"
+    "@vitest/ui": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "vite": "^4.1.4",
+    "vitest": "^3.2.4"
   }
 }

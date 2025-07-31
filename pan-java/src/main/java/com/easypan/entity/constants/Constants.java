@@ -25,7 +25,7 @@ public class Constants {
 
     public static final String SESSION_SHARE_KEY = "session_share_key_";
 
-    public static final String FILE_FOLDER_FILE = "/file/";
+    public static final String  FILE_FOLDER_FILE = "/file/";
 
     public static final String FILE_FOLDER_TEMP = "/temp/";
 
@@ -78,5 +78,24 @@ public class Constants {
     public static final String REDIS_KEY_USER_SPACE_USE = "easypan:user:spaceuse:";
 
     public static final String REDIS_KEY_USER_FILE_TEMP_SIZE = "easypan:user:file:temp:";
+
+    /**
+     * 分片下载相关常量
+     */
+    
+    /**
+     * 分片下载大小 512KB (与上传保持一致)
+     */
+    public static final Integer CHUNK_SIZE_DOWNLOAD = 1024 * 512;
+
+    /**
+     * 最大并发分片数量
+     */
+    public static final Integer MAX_CONCURRENT_CHUNKS = 3;
+
+    /**
+     * 最大重试次数
+     */
+    public static final Integer MAX_RETRY_COUNT = 3;
 
 }

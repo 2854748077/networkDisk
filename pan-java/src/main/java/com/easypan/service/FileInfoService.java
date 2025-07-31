@@ -8,7 +8,10 @@ import com.easypan.entity.vo.PaginationResultVO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 
@@ -86,4 +89,6 @@ public interface FileInfoService {
     Long getUserUseSpace(@Param("userId") String userId);
 
     void deleteFileByUserId(@Param("userId") String userId);
+
+    void downloadFile(HttpServletRequest request, HttpServletResponse response, String code) throws UnsupportedEncodingException;
 }

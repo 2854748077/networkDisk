@@ -44,6 +44,7 @@ com\easypan\entity\constants\Constants.class
 com\easypan\service\FileInfoService.class
 com\easypan\entity\query\FileShareQuery.class
 com\easypan\entity\query\UserInfoQuery.class
+com\easypan\entity\dto\GitHubInfoDto.class
 com\easypan\entity\enums\PageSize.class
 com\easypan\aspect\GlobalOperationAspect.class
 com\easypan\entity\dto\QQInfoDto.class

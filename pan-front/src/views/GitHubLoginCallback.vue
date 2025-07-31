@@ -26,4 +26,4 @@ const route = useRoute();
 
 <style lang="scss" scoped>
 /* GitHub登录回调页面样式 */
-</style> 
+</style>

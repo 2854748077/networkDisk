@@ -155,6 +155,7 @@ public class AccountController extends ABaseController {
         }
     }
 
+    //查询数据库判断邮箱是否存在，然后校验邮箱验证码，然后创建新的 用户  然后设置密码然后存到数据库。
     @RequestMapping("/resetPwd")
     @GlobalInterceptor(checkLogin = false, checkParams = true)
     public ResponseVO resetPwd(HttpSession session,
@@ -173,17 +174,23 @@ public class AccountController extends ABaseController {
         }
     }
 
+
+/*
+* 拼接出文件夹的路径，然后判断文件夹是否存在，如果不存在则创建文件夹
+* 拼接图片存储路径，然后判断是否存在，不存在者判断默认图片是否存在，存在则把头像照片设为默认图片
+* 通过fileinputStream读取图片，然后fileoutputStream写入到response中
+* */
     @RequestMapping("/getAvatar/{userId}")
     @GlobalInterceptor(checkLogin = false, checkParams = true)
     public void getAvatar(HttpServletResponse response, @VerifyParam(required = true) @PathVariable("userId") String userId) {
-        String avatarFolderName = Constants.FILE_FOLDER_FILE + Constants.FILE_FOLDER_AVATAR_NAME;
-        File folder = new File(appConfig.getProjectFolder() + avatarFolderName);
+        String avatarFolderName = Constants.FILE_FOLDER_FILE + Constants.FILE_FOLDER_AVATAR_NAME;  //拼出路劲 ：/file/avatar/
+        File folder = new File(appConfig.getProjectFolder() + avatarFolderName);   //拼出本地存储的地址
         if (!folder.exists()) {
-            folder.mkdirs();
+            folder.mkdirs();                         //如果不存在，创建文件夹
         }
 
-        String avatarPath = appConfig.getProjectFolder() + avatarFolderName + userId + Constants.AVATAR_SUFFIX;
-        File file = new File(avatarPath);
+        String avatarPath = appConfig.getProjectFolder() + avatarFolderName + userId + Constants.AVATAR_SUFFIX;//拼出图片的绝对路径
+        File file = new File(avatarPath);//创建文件对象
         if (!file.exists()) {
             if (!new File(appConfig.getProjectFolder() + avatarFolderName + Constants.AVATAR_DEFUALT).exists()) {
                 printNoDefaultImage(response);
@@ -191,8 +198,8 @@ public class AccountController extends ABaseController {
             }
             avatarPath = appConfig.getProjectFolder() + avatarFolderName + Constants.AVATAR_DEFUALT;
         }
-        response.setContentType("image/jpg");
-        readFile(response, avatarPath);
+        response.setContentType("image/jpg");   //设置响应内容
+        readFile(response, avatarPath);         //FileoutputStream:字节数组输出流，返回图片给前端。
     }
 
     private void printNoDefaultImage(HttpServletResponse response) {
@@ -210,6 +217,7 @@ public class AccountController extends ABaseController {
         }
     }
 
+    //从session中获取用户信息，并返回信息前端
     @RequestMapping("/getUserInfo")
     @GlobalInterceptor
     public ResponseVO getUserInfo(HttpSession session) {
@@ -217,6 +225,14 @@ public class AccountController extends ABaseController {
         return getSuccessResponseVO(sessionWebUserDto);
     }
 
+    /*
+    *
+     * 从redis缓存中使用键（前缀+id）获取对应的用户空间就信息，
+     * 当redis缓存中没有对应用户口空间信息，创建新的UserSpaceDto，从MySQL数据库中获取用户空间信息
+     * ，并保存到redis缓存中，设置过期日期是1天。
+     * 将用户空间信息返回前端
+    *
+    * */
     @RequestMapping("/getUseSpace")
     @GlobalInterceptor
     public ResponseVO getUseSpace(HttpSession session) {
@@ -224,12 +240,20 @@ public class AccountController extends ABaseController {
         return getSuccessResponseVO(redisComponent.getUserSpaceUse(sessionWebUserDto.getUserId()));
     }
 
+
+/*
+*    退出登录：销毁 HttpSession对象
+* */
     @RequestMapping("/logout")
     public ResponseVO logout(HttpSession session) {
         session.invalidate();
         return getSuccessResponseVO(null);
     }
 
+    //修改用户头像
+    /*
+    * 创建新的文件对象，然后将MultipartFile对象保存到指定目录中（服务器）。
+    * */
     @RequestMapping("/updateUserAvatar")
     @GlobalInterceptor
     public ResponseVO updateUserAvatar(HttpSession session, MultipartFile avatar) {
@@ -239,9 +263,9 @@ public class AccountController extends ABaseController {
         if (!targetFileFolder.exists()) {
             targetFileFolder.mkdirs();
         }
-        File targetFile = new File(targetFileFolder.getPath() + "/" + webUserDto.getUserId() + Constants.AVATAR_SUFFIX);
+        File targetFile = new File(targetFileFolder.getPath() + "/" + webUserDto.getUserId() + Constants.AVATAR_SUFFIX);//  路径/id.jpg
         try {
-            avatar.transferTo(targetFile);
+            avatar.transferTo(targetFile);  //将前端上传的图片保存到指定目录
         } catch (Exception e) {
             logger.error("上传头像失败", e);
         }
@@ -253,6 +277,7 @@ public class AccountController extends ABaseController {
         session.setAttribute(Constants.SESSION_KEY, webUserDto);
         return getSuccessResponseVO(null);
     }
+
 
     @RequestMapping("/updatePassword")
     @GlobalInterceptor(checkParams = true)

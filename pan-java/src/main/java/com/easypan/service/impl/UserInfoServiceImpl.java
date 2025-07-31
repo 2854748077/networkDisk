@@ -280,6 +280,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         this.userInfoMapper.insert(userInfo);
     }
 
+    //查询数据库判断邮箱是否存在，然后校验邮箱验证码，然后创建新的 用户  然后设置密码然后存到数据库。
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void resetPwd(String email, String password, String emailCode) {
@@ -294,6 +295,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         updateInfo.setPassword(StringTools.encodeByMD5(password));
         this.userInfoMapper.updateByEmail(updateInfo, email);
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)

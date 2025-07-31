@@ -501,13 +501,46 @@ const navChange = (data) => {
 
 //下载文件
 const download = async (row) => {
-  let result = await proxy.Request({
-    url: api.createDownloadUrl + "/" + row.fileId,
-  });
-  if (!result) {
-    return;
+  try {
+    // 使用新的下载管理器，自动选择分片下载或传统下载
+    const { globalDownloadManager } = await import('@/utils/DownloadManager.js');
+    
+    await globalDownloadManager.downloadFile(
+      row.fileId,
+      row.fileName,
+      {
+        onProgress: (progressInfo) => {
+          // 可以在这里显示下载进度（暂时只在控制台输出）
+          if (progressInfo.method === 'chunk') {
+            console.log(`下载进度: ${progressInfo.progress}% (${progressInfo.downloadedSize}/${progressInfo.totalSize} bytes)`);
+          }
+        },
+        onComplete: (info) => {
+          console.log(`文件下载完成: ${info.fileName}`);
+          proxy.Message.success(`文件 ${info.fileName} 下载完成`);
+        },
+        onError: (error) => {
+          console.error('下载失败:', error);
+          proxy.Message.error(`文件下载失败: ${error.error?.message || '未知错误'}`);
+        }
+      }
+    );
+  } catch (error) {
+    console.error('下载失败:', error);
+    proxy.Message.error(`文件下载失败: ${error.message}`);
+    
+    // 如果新的下载方式失败，回退到原始方式
+    try {
+      let result = await proxy.Request({
+        url: api.createDownloadUrl + "/" + row.fileId,
+      });
+      if (result) {
+        window.location.href = api.download + "/" + result.data;
+      }
+    } catch (fallbackError) {
+      console.error('回退下载也失败:', fallbackError);
+    }
   }
-  window.location.href = api.download + "/" + result.data;
 };
 
 //分享

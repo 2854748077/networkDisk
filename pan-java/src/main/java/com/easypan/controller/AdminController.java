@@ -39,7 +39,9 @@ public class AdminController extends CommonFileController {
         return getSuccessResponseVO(redisComponent.getSysSettingsDto());
     }
 
-
+/*
+* 把用户创建基本信息保存到redis中
+* */
     @RequestMapping("/saveSysSettings")
     @GlobalInterceptor(checkParams = true, checkAdmin = true)
     public ResponseVO saveSysSettings(
@@ -135,6 +137,7 @@ public class AdminController extends CommonFileController {
     @GlobalInterceptor(checkLogin = false, checkParams = true)
     public void download(HttpServletRequest request, HttpServletResponse response,
                          @PathVariable("code") @VerifyParam(required = true) String code) throws Exception {
+        fileInfoService.downloadFile(request, response, code);
         super.download(request, response, code);
     }
 

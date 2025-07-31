@@ -6,6 +6,8 @@ import com.easypan.entity.po.FileShare;
 import com.easypan.entity.query.FileShareQuery;
 import com.easypan.entity.vo.PaginationResultVO;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 
@@ -66,4 +68,5 @@ public interface FileShareService {
     void deleteFileShareBatch(String[] shareIdArray, String userId);
 
     SessionShareDto checkShareCode(  String shareId,String code);
+
 }

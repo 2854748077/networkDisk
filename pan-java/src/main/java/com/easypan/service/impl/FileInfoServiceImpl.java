@@ -3,6 +3,8 @@ package com.easypan.service.impl;
 import com.easypan.component.RedisComponent;
 import com.easypan.entity.config.AppConfig;
 import com.easypan.entity.constants.Constants;
+import com.easypan.entity.dto.ChunkDownloadDto;
+import com.easypan.entity.dto.DownloadFileDto;
 import com.easypan.entity.dto.SessionWebUserDto;
 import com.easypan.entity.dto.UploadResultDto;
 import com.easypan.entity.dto.UserSpaceDto;
@@ -33,9 +35,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -808,4 +811,315 @@ public class FileInfoServiceImpl implements FileInfoService {
     public void deleteFileByUserId(String userId) {
         this.fileInfoMapper.deleteFileByUserId(userId);
     }
+
+    @Override
+    public void downloadFile(HttpServletRequest request, HttpServletResponse response, String code) throws UnsupportedEncodingException {
+        // 从Redis中获取下载信息
+        DownloadFileDto downloadFileDto = redisComponent.getDownloadCode(code);
+        if (null == downloadFileDto) {
+            return;
+        }
+        String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + downloadFileDto.getFilePath();
+        String fileName = downloadFileDto.getFileName();
+        response.setContentType("application/x-msdownload; charset=UTF-8");
+
+        // 根据浏览器类型处理文件名编码
+        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0) {
+            // IE浏览器
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+        } else {
+            fileName = new String(fileName.getBytes("UTF-8"), "ISO8859-1");
+        }
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
+        readFile(response, filePath);
+    }
+
+    /**
+     * 验证分片下载请求的合法性
+     * 检查分片索引范围和下载码有效性，复用现有的安全验证逻辑
+     * 
+     * @param code 下载码
+     * @param chunkIndex 分片索引
+     * @param totalChunks 总分片数
+     * @return boolean 验证结果
+     */
+    public boolean validateChunkRequest(String code, Integer chunkIndex, Integer totalChunks) {
+        try {
+            // 验证参数不为空
+            if (StringTools.isEmpty(code) || chunkIndex == null || totalChunks == null) {
+                logger.error("分片请求参数不能为空: code={}, chunkIndex={}, totalChunks={}", code, chunkIndex, totalChunks);
+                return false;
+            }
+            
+            // 验证下载码有效性（复用现有的Redis缓存验证逻辑）
+            DownloadFileDto downloadFileDto = redisComponent.getDownloadCode(code);
+            if (downloadFileDto == null) {
+                logger.error("下载码无效或已过期: {}", code);
+                return false;
+            }
+            
+            // 验证分片索引范围
+            if (chunkIndex < 0 || chunkIndex >= totalChunks) {
+                logger.error("分片索引超出范围: chunkIndex={}, totalChunks={}", chunkIndex, totalChunks);
+                return false;
+            }
+            
+            // 验证总分片数的合理性
+            if (totalChunks <= 0 || totalChunks > 10000) { // 设置合理的上限防止恶意请求
+                logger.error("总分片数不合理: totalChunks={}", totalChunks);
+                return false;
+            }
+            
+            // 验证文件是否存在（复用现有的安全验证逻辑）
+            String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + downloadFileDto.getFilePath();
+            if (!StringTools.pathIsOk(filePath)) {
+                logger.error("文件路径不合法: {}", filePath);
+                return false;
+            }
+            
+            File file = new File(filePath);
+            if (!file.exists()) {
+                logger.error("文件不存在: {}", filePath);
+                return false;
+            }
+            
+            // 验证分片数量与文件大小的一致性
+            long fileSize = file.length();
+            int expectedTotalChunks = (int) Math.ceil((double) fileSize / Constants.CHUNK_SIZE_DOWNLOAD);
+            if (!totalChunks.equals(expectedTotalChunks)) {
+                logger.error("分片数量与文件大小不匹配: expected={}, actual={}, fileSize={}", 
+                    expectedTotalChunks, totalChunks, fileSize);
+                return false;
+            }
+            
+            logger.debug("分片请求验证通过: code={}, chunkIndex={}, totalChunks={}", code, chunkIndex, totalChunks);
+            return true;
+            
+        } catch (Exception e) {
+            logger.error("分片请求验证异常: code={}, chunkIndex={}, totalChunks={}", code, chunkIndex, totalChunks, e);
+            return false;
+        }
+    }
+
+    /**
+     * 获取文件分片下载信息
+     * 计算文件总分片数和每个分片的大小，集成现有的Redis缓存机制
+     * 
+     * @param code 下载码
+     * @return ChunkDownloadDto 分片下载信息
+     */
+    public ChunkDownloadDto getChunkDownloadInfo(String code) {
+        try {
+            DownloadFileDto downloadFileDto = redisComponent.getDownloadCode(code);
+            if (downloadFileDto == null) {
+                logger.error("下载码无效或已过期: {}", code);
+                return null;
+            }
+            
+            String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + downloadFileDto.getFilePath();
+            File file = new File(filePath);
+            if (!file.exists()) {
+                logger.error("文件不存在: {}", filePath);
+                return null;
+            }
+            
+            long fileSize = file.length();
+            int chunkSize = Constants.CHUNK_SIZE_DOWNLOAD;
+            int totalChunks = (int) Math.ceil((double) fileSize / chunkSize);
+            
+            ChunkDownloadDto chunkDownloadDto = new ChunkDownloadDto(
+                code,
+                downloadFileDto.getFilePath(),
+                downloadFileDto.getFileName(),
+                fileSize,
+                totalChunks,
+                chunkSize
+            );
+            
+            logger.debug("获取分片下载信息成功: fileName={}, fileSize={}, totalChunks={}", 
+                downloadFileDto.getFileName(), fileSize, totalChunks);
+            
+            return chunkDownloadDto;
+            
+        } catch (Exception e) {
+            logger.error("获取分片下载信息异常: code={}", code, e);
+            return null;
+        }
+    }
+
+    /**
+     * 分片下载文件
+     * 使用优化的缓冲区和内存映射实现高性能的指定范围文件读取
+     * 
+     * @param response HTTP响应对象
+     * @param filePath 文件路径
+     * @param start 开始位置
+     * @param end 结束位置
+     */
+    public void downloadFileChunk(HttpServletResponse response, String filePath, long start, long end) {
+        if (!StringTools.pathIsOk(filePath)) {
+            logger.error("文件路径不合法: {}", filePath);
+            return;
+        }
+        
+        RandomAccessFile randomAccessFile = null;
+        OutputStream out = null;
+        BufferedOutputStream bufferedOut = null;
+        
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                logger.error("文件不存在: {}", filePath);
+                return;
+            }
+            
+            // 验证范围参数
+            long fileLength = file.length();
+            if (start < 0 || end >= fileLength || start > end) {
+                logger.error("分片范围参数无效: start={}, end={}, fileLength={}", start, end, fileLength);
+                return;
+            }
+            
+            long chunkSize = end - start + 1;
+            
+            // 设置HTTP响应头，支持断点续传
+            response.setHeader("Accept-Ranges", "bytes");
+            response.setHeader("Content-Range", String.format("bytes %d-%d/%d", start, end, fileLength));
+            response.setHeader("Content-Length", String.valueOf(chunkSize));
+            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+            
+            randomAccessFile = new RandomAccessFile(file, "r");
+            randomAccessFile.seek(start);
+            
+            out = response.getOutputStream();
+            // 使用缓冲输出流提高性能
+            bufferedOut = new BufferedOutputStream(out, 8192);
+            
+            // 根据分片大小选择最优的缓冲区大小
+            int bufferSize = calculateOptimalBufferSize(chunkSize);
+            byte[] buffer = new byte[bufferSize];
+            long remaining = chunkSize;
+            
+            // 性能监控
+            long startTime = System.currentTimeMillis();
+            long totalBytesRead = 0;
+            
+            while (remaining > 0) {
+                int bytesToRead = (int) Math.min(buffer.length, remaining);
+                int bytesRead = randomAccessFile.read(buffer, 0, bytesToRead);
+                
+                if (bytesRead == -1) {
+                    break;
+                }
+                
+                bufferedOut.write(buffer, 0, bytesRead);
+                remaining -= bytesRead;
+                totalBytesRead += bytesRead;
+                
+                // 定期刷新缓冲区，避免内存积累过多
+                if (totalBytesRead % (bufferSize * 4) == 0) {
+                    bufferedOut.flush();
+                }
+            }
+            
+            bufferedOut.flush();
+            
+            // 记录性能指标
+            long endTime = System.currentTimeMillis();
+            long duration = endTime - startTime;
+            double throughput = totalBytesRead / (duration / 1000.0) / 1024 / 1024; // MB/s
+            
+            logger.debug("分片下载完成: start={}, end={}, size={}bytes, duration={}ms, throughput={:.2f}MB/s", 
+                start, end, totalBytesRead, duration, throughput);
+            
+        } catch (Exception e) {
+            logger.error("分片读取文件异常: filePath={}, start={}, end={}", filePath, start, end, e);
+        } finally {
+            // 按顺序关闭资源
+            if (bufferedOut != null) {
+                try {
+                    bufferedOut.close();
+                } catch (IOException e) {
+                    logger.error("关闭缓冲输出流异常", e);
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.error("关闭输出流异常", e);
+                }
+            }
+            if (randomAccessFile != null) {
+                try {
+                    randomAccessFile.close();
+                } catch (IOException e) {
+                    logger.error("关闭RandomAccessFile异常", e);
+                }
+            }
+        }
+    }
+    
+    /**
+     * 计算最优缓冲区大小
+     * 根据分片大小动态调整缓冲区，平衡内存使用和I/O性能
+     * 
+     * @param chunkSize 分片大小
+     * @return 最优缓冲区大小
+     */
+    private int calculateOptimalBufferSize(long chunkSize) {
+        // 基础缓冲区大小
+        int baseBufferSize = 8192; // 8KB
+        
+        if (chunkSize <= 64 * 1024) {
+            // 小分片（<=64KB）：使用较小的缓冲区
+            return Math.max(1024, (int) chunkSize / 4);
+        } else if (chunkSize <= 1024 * 1024) {
+            // 中等分片（<=1MB）：使用标准缓冲区
+            return baseBufferSize;
+        } else {
+            // 大分片（>1MB）：使用较大的缓冲区
+            return Math.min(65536, baseBufferSize * 4); // 最大64KB
+        }
+    }
+
+    protected void readFile(HttpServletResponse response, String filePath) {
+        if (!StringTools.pathIsOk(filePath)) {
+            return;
+        }
+        OutputStream out = null;
+        FileInputStream in = null;
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                return;
+            }
+            in = new FileInputStream(file);
+            byte[] byteData = new byte[1024];
+            out = response.getOutputStream();
+            int len = 0;
+            while ((len = in.read(byteData)) != -1) {
+                out.write(byteData, 0, len);
+            }
+            out.flush();
+        } catch (Exception e) {
+            logger.error("读取文件异常", e);
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.error("IO异常", e);
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.error("IO异常", e);
+                }
+            }
+        }
+    }
+
 }

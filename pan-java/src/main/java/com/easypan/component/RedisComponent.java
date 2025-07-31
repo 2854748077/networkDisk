@@ -64,6 +64,14 @@ public class RedisComponent {
      * @param userId
      * @return
      */
+
+    /*
+    *
+    * 从redis缓存中使用键（前缀+id）获取对应的用户空间就信息，
+    * 当redis缓存中没有对应用户口空间信息，创建新的UserSpaceDto，从MySQL数据库中获取用户空间信息
+    * ，并保存到redis缓存中，设置过期日期是1天。
+    * 返回用户空间信息
+    * */
     public UserSpaceDto getUserSpaceUse(String userId) {
         UserSpaceDto spaceDto = (UserSpaceDto) redisUtils.get(Constants.REDIS_KEY_USER_SPACE_USE + userId);
         if (null == spaceDto) {

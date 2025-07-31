@@ -67,6 +67,7 @@ D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\aspect\G
 D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\entity\enums\VerifyRegexEnum.java
 D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\entity\config\AppConfig.java
 D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\entity\enums\FileCategoryEnums.java
+D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\entity\dto\ChunkDownloadDto.java
 D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\task\FileCleanTask.java
 D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\controller\AdminController.java
 D:\graduate_project\graduate_project\pan-java\src\main\java\com\easypan\entity\enums\FileDelFlagEnums.java

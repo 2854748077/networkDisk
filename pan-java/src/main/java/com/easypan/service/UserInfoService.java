@@ -5,6 +5,8 @@ import com.easypan.entity.po.UserInfo;
 import com.easypan.entity.query.UserInfoQuery;
 import com.easypan.entity.vo.PaginationResultVO;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 
@@ -128,4 +130,7 @@ public interface UserInfoService {
     SessionWebUserDto githubLogin(String code);
 
     void changeUserSpace(String userId, Integer changeSpace);
+
+
+
 }
