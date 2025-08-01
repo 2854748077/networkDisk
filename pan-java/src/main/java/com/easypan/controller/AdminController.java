@@ -110,7 +110,7 @@ public class AdminController extends CommonFileController {
         super.getFile(request, response, fileId, userId);
     }
 
-
+//
     @RequestMapping("/ts/getVideoInfo/{userId}/{fileId}")
     @GlobalInterceptor(checkParams = true, checkAdmin = true)
     public void getVideoInfo(HttpServletRequest request, HttpServletResponse response,
