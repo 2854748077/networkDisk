@@ -34,7 +34,7 @@ import java.util.List;
 @Component("operationAspect")
 @Aspect
 public class GlobalOperationAspect {
-
+//全局切面+切点
     private static Logger logger = LoggerFactory.getLogger(GlobalOperationAspect.class);
     private static final String TYPE_STRING = "java.lang.String";
     private static final String TYPE_INTEGER = "java.lang.Integer";
