@@ -98,4 +98,8 @@ public class Constants {
      */
     public static final Integer MAX_RETRY_COUNT = 3;
 
+/**
+* kafka消费组ID
+* */
+    public static final String KAFKA_GROUP_ID = "easypan-group";
 }
