@@ -45,6 +45,9 @@ public class KafkaComponent {
      */
     public static final String TOPIC_USER_LOGIN = "user-login";
 
+    public static final String TOPIC_SEND_EMAIL = "user-sendEmail";
+
+
     /**
      * 文件分享事件主题
      */
@@ -60,10 +63,10 @@ public class KafkaComponent {
         String jsonMessage = JSON.toJSONString(message);
         logger.info("发送消息: {}", jsonMessage);
 
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, jsonMessage);
+        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, jsonMessage);       //
 
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
-
+        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {            // 异步计算的结果，你可以在未来某个时间点通过 .get() 获取结果（
+//“把这个新创建的 Callback 对象注册到 future 对象上。当 future 最终完成（成功或失败）时，请调用这个 Callback 对象的 onSuccess 或 onFailure 方法。
             @Override
             public void onSuccess(SendResult<String, String> result) {
                 logger.info("成功发送消息到Kafka - Topic: {}, Partition: {}, Offset: {}",
@@ -84,7 +87,7 @@ public class KafkaComponent {
 
     /**
      * 异步发送
-     * 
+     *
      * @param topic   主题
      * @param message 消息内容
      * @return CompletableFuture

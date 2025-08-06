@@ -1,9 +1,13 @@
 package com.easypan.service.impl;
 
+import com.easypan.entity.dto.*;
+import com.alibaba.fastjson.JSON;
+import com.easypan.component.KafkaComponent;
 import com.easypan.component.RedisComponent;
 import com.easypan.entity.config.AppConfig;
 import com.easypan.entity.constants.Constants;
 import com.easypan.entity.dto.SysSettingsDto;
+import com.easypan.entity.dto.sendEmailEvent;
 import com.easypan.entity.enums.PageSize;
 import com.easypan.entity.po.EmailCode;
 import com.easypan.entity.po.UserInfo;
@@ -18,6 +22,7 @@ import com.easypan.service.EmailCodeService;
 import com.easypan.utils.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -51,6 +56,9 @@ public class EmailCodeServiceImpl implements EmailCodeService {
 
     @Resource
     private RedisComponent redisComponent;
+
+    @Resource
+    private sendEmailEvent sendEmailEvent;
 
     /**
      * 根据条件查询列表
@@ -137,8 +145,16 @@ public class EmailCodeServiceImpl implements EmailCodeService {
         return this.emailCodeMapper.deleteByEmailAndCode(email, code);
     }
 
+    @Override
+    public void sendEmailCode(String toEmail, Integer type) {
+
+    }
+
+
     private void sendEmailCode(String toEmail, String code) {
+
         try {
+
             MimeMessage message = javaMailSender.createMimeMessage();
 
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -164,8 +180,14 @@ public class EmailCodeServiceImpl implements EmailCodeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendEmailCode(String toEmail, Integer type) {
+    @KafkaListener(topics = KafkaComponent.TOPIC_SEND_EMAIL, groupId = Constants.KAFKA_GROUP_ID)
+    public void sendEmailCode(String Message) {
         //如果是注册，校验邮箱是否已存在
+        logger.info("接收文件${}",Message);
+
+         sendEmailEvent = JSON.parseObject(Message, sendEmailEvent.class);
+        String toEmail =sendEmailEvent.getEmail();
+        Integer type = sendEmailEvent.getType();
         if (type == Constants.ZERO) {
             UserInfo userInfo = userInfoMapper.selectByEmail(toEmail);
             if (null != userInfo) {

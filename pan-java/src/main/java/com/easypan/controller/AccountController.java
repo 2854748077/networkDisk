@@ -1,7 +1,12 @@
 package com.easypan.controller;
 
+
+import com.easypan.entity.dto.*;
+
+
 import com.easypan.annotation.GlobalInterceptor;
 import com.easypan.annotation.VerifyParam;
+import com.easypan.component.KafkaComponent;
 import com.easypan.component.RedisComponent;
 import com.easypan.entity.config.AppConfig;
 import com.easypan.entity.constants.Constants;
@@ -18,6 +23,7 @@ import com.easypan.utils.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,6 +61,11 @@ public class AccountController extends ABaseController {
     @Resource
     private RedisComponent redisComponent;
 
+    @Resource
+    private KafkaComponent kafkaComponent;
+
+    @Resource
+    private sendEmailEvent sendEmailEvent;
     /**
      * 验证码
      *
@@ -72,11 +83,13 @@ public class AccountController extends ABaseController {
         response.setDateHeader("Expires", 0);
         response.setContentType("image/jpeg");
         String code = vCode.getCode();
+        logger.info("验证码：{}", code);
         if (type == null || type == 0) {
             session.setAttribute(Constants.CHECK_CODE_KEY, code);
         } else {
             session.setAttribute(Constants.CHECK_CODE_KEY_EMAIL, code);
         }
+
         vCode.write(response.getOutputStream());
     }
 
@@ -87,6 +100,7 @@ public class AccountController extends ABaseController {
      * @param: [session, email, checkCode, type]
      * @return: com.easypan.entity.vo.ResponseVO
      */
+
     @RequestMapping("/sendEmailCode")
     @GlobalInterceptor(checkLogin = false, checkParams = true)
     public ResponseVO sendEmailCode(HttpSession session,
@@ -97,7 +111,11 @@ public class AccountController extends ABaseController {
             if (!checkCode.equalsIgnoreCase((String) session.getAttribute(Constants.CHECK_CODE_KEY_EMAIL))) {
                 throw new BusinessException("图片验证码不正确");
             }
-            emailCodeService.sendEmailCode(email, type);
+
+            sendEmailEvent event=new sendEmailEvent(email,type);
+            kafkaComponent.sendMessage(KafkaComponent.TOPIC_SEND_EMAIL, event);
+           // emailCodeService.sendEmailCode(email, type);
+            logger.info("发送邮件成功");
             return getSuccessResponseVO(null);
         } finally {
             session.removeAttribute(Constants.CHECK_CODE_KEY_EMAIL);

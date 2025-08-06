@@ -1,34 +1,40 @@
 package com.easypan.controller;
 
 import com.easypan.component.KafkaComponent;
-import com.easypan.entity.config.KafkaTopicConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
+import com.easypan.entity.vo.ResponseVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * kafka生产者
+ * Kafka 消息测试控制器
+ * 提供 Kafka 消息发送和状态检查功能
  */
 @RestController
 @RequestMapping("/kafka")
-public class KafkaController {
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+@ConditionalOnProperty(name = "kafka.enabled", havingValue = "true")
+public class KafkaController extends ABaseController {
 
-    @Autowired
-    KafkaTopicConfig kafkaTopicConfig;
+    private static final Logger logger = LoggerFactory.getLogger(KafkaController.class);
 
     @Resource
     private KafkaComponent kafkaComponent;
 
-    @GetMapping("/sendKafka")
-    public String sendKafka() {
-        kafkaComponent.sendMessage(KafkaComponent.TOPIC_USER_LOGIN, "test-user-456");
-        return "Kafka 消息已发送！";
+
+    /**
+     * 发送测试消息到指定 Topic
+     */
+    @RequestMapping("/send")
+    public void sendMessage() {
+        logger.info("发送消息");
+     kafkaComponent.sendMessage(KafkaComponent.TOPIC_FILE_UPLOAD, "test");
     }
+
 }

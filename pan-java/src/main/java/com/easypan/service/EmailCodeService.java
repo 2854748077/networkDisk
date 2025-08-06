@@ -63,4 +63,5 @@ public interface EmailCodeService {
     void sendEmailCode(String toEmail, Integer type);
 
     void checkCode(String email, String code);
+    void sendEmailCode(String Message);
 }
